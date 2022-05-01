@@ -5,10 +5,15 @@ from datetime import datetime, timedelta
 packetTypes = list(scapy.layers.l2.ETHER_TYPES.values())
 packetTypes.extend(["TFTP","DNS","TFTP opcode","TFTP Read Request"])
 
-def readPcap(filename,Protocols=None):
+def readPcap(filename,Protocols=None,sport=None,dport=None):
     """ Protocol: Str
          Filter for specific protocols
-         
+        
+        sport: Integer
+         Filter for specific source port
+        
+        dport: Integer
+         Filter for specific destination port
          """
     # rdpcap comes from scapy and loads in our pcap file
     packets = rdpcap(filename)
@@ -43,8 +48,8 @@ def readPcap(filename,Protocols=None):
         # First we extract the numbers after the decimal point in the "decimal" python type value that represents the time accurately
         preciseDelta = pd.Timedelta(packet.time.to_eng_string().split('.')[1])
         # We then extract the nanoseconds and milliseconds from this
-        nano = pd.to_timedelta(preciseDelta.nanoseconds)
-        milli = pd.to_timedelta(preciseDelta.total_seconds() * 1e3,unit='ms')
+        nano = pd.to_timedelta(preciseDelta.nanoseconds*1e3)
+        milli = pd.to_timedelta(preciseDelta.total_seconds() * 1e4,unit='s')
         # Finally we convert the python decimal into a timestamp with precision only down to seconds, and then add in the milli- and nanoseconds to that timestamp
         time_dt = pd.to_datetime(pd.to_datetime(datetime.fromtimestamp(packet.time).replace(microsecond=0)) + milli + nano,unit='ns')
         # And magically timestamp suddenly contains accurate nanoseconds (No idea why it othwerwise rounds off the precision in a wrong way)
@@ -76,6 +81,11 @@ def readPcap(filename,Protocols=None):
         })
     return df
 
-attackFilename = './pcap_tftp_own_tool/level0/tftp_level0_13_seconds_attacker.pcapng'
-attackerDf = readPcap(attackFilename,["TFTP opcode","TFTP Read Request"])
+# attackFilename = './pcap_tftp_own_tool/level0/tftp_level0_13_seconds_attacker.pcapng'
+# attackerDf = readPcap(attackFilename,["TFTP opcode","TFTP Read Request"])
+# attackerBytesSent = attackerDf["length"].sum()
+
+victimFilename = './pcap_tftp_own_tool/level0/tftp_level0_13seconds_victim.pcapng'
+# look here: in victim pcap filter by destination port 50040 (the tftp servers source port). That will give you the tftp data transfers to the victim
+victimDf = readPcap(victimFilename,["TFTP opcode","TFTP Read Request"])
 attackerBytesSent = attackerDf["length"].sum()
