@@ -1,91 +1,31 @@
-from cmath import nan
-from scapy.all import *
 import pandas as pd
-from datetime import datetime, timedelta
-packetTypes = list(scapy.layers.l2.ETHER_TYPES.values())
-packetTypes.extend(["TFTP","DNS","TFTP opcode","TFTP Read Request"])
+import subprocess
+import os
 
-def readPcap(filename,Protocols=None,sport=None,dport=None):
-    """ Protocol: Str
-         Filter for specific protocols
-        
-        sport: Integer
-         Filter for specific source port
-        
-        dport: Integer
-         Filter for specific destination port
-         """
-    # rdpcap comes from scapy and loads in our pcap file
-    packets = rdpcap(filename)
+def pcapToDf(filename,RetainCSV=False):
+    """ Reads a pcap file with tshark, extracts the data in it and outputs it to a csv file.
+        It then reads the csv file into a dataframe and deletes the csvFile
 
-    # Let's iterate through every packet
-    dsts = [] # Destination IPs
-    srcs = [] # Source IPs
-    packetlen = [] # packet lengths
-    times = [] # Time of occurence since start of capture
-    protos = [] # Protocol type of the packet
-
-    for packet in packets:
-        layernames = [pack._name for pack in packet.layers()]
-        # Scapy sometimes wants to place the protocol names in different places, so we have to search for them....
-        if None in layernames:
-            NoneIndex = layernames.index(None)
-            layernames[NoneIndex] = packet.getlayer(NoneIndex).name
-        # If not in application layer it will be in the network layer
-        proto = set(layernames) & set(packetTypes)
-        if len(proto) < 1:
-            protocol = 'Unknown'
-        else:
-            protocol = next(iter(proto))
-        if packet.getlayer(IP) != None:
-            packsrc = packet.payload.src
-            packdst = packet.payload.dst
-        else:
-            packsrc = packet.src
-            packdst = packet.dst
-        packlen = len(packet)
-        ## Since datetime is limited to microseconds and not nanoseconds we have to perform some magic
-        # First we extract the numbers after the decimal point in the "decimal" python type value that represents the time accurately
-        preciseDelta = pd.Timedelta(packet.time.to_eng_string().split('.')[1])
-        # We then extract the nanoseconds and milliseconds from this
-        nano = pd.to_timedelta(preciseDelta.nanoseconds*1e3)
-        milli = pd.to_timedelta(preciseDelta.total_seconds() * 1e4,unit='s')
-        # Finally we convert the python decimal into a timestamp with precision only down to seconds, and then add in the milli- and nanoseconds to that timestamp
-        time_dt = pd.to_datetime(pd.to_datetime(datetime.fromtimestamp(packet.time).replace(microsecond=0)) + milli + nano,unit='ns')
-        # And magically timestamp suddenly contains accurate nanoseconds (No idea why it othwerwise rounds off the precision in a wrong way)
-        if Protocols != None:
-            if isinstance(Protocols,list):
-                protoPresent = any(prot in packet for prot in Protocols)
-            else:
-                protoPresent = Protocols in packet
-            if protoPresent:
-                srcs.append(packsrc)
-                dsts.append(packdst)
-                protos.append(protocol)
-                packetlen.append(packlen)
-                times.append(time_dt)
-        else:
-            srcs.append(packsrc)
-            dsts.append(packdst)
-            protos.append(protocol)
-            packetlen.append(packlen)
-            times.append(time_dt)
-
-
-    df = pd.DataFrame(
-        {'time':times,
-        'src': srcs,
-        'dst': dsts,
-        'protocol':protos,
-        'length': packetlen
-        })
+        Input: 
+            Filename (string): path to pcap file
+    """
+    csvFilename = os.path.splitext(filename)[0] + '.csv'
+    with open(csvFilename,'w') as f:
+        command = "tshark -r " + filename + " -T fields -e frame.number -e frame.time -e ip.src -e ip.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport -e _ws.col.Protocol -e frame.len -e _ws.col.Info -E header=y -E separator=/t"
+        subprocess.run(command.split(), stdout =f)
+    # Read headers
+    fields = pd.read_csv(csvFilename, index_col=0, nrows=0).columns.tolist()[0].split('\t')
+    df = pd.read_csv(csvFilename,sep='\t',header=0,names=fields)
+    if not RetainCSV:
+        os.remove(csvFilename)
+    df.rename(columns = {'frame.number':'FrameNumber','frame.time':'Time','ip.src':'Source','ip.dst':'Destination','tcp.srcport':'TCP Source Port','tcp.dstport':'TCP Destination Port','udp.srcport':'UDP Source Port','udp.dstport':'UDP Destination Port','_ws.col.Protocol':'Protocol','frame.len':'Length','_ws.col.Info':'Info'},inplace = True)
     return df
-
-# attackFilename = './pcap_tftp_own_tool/level0/tftp_level0_13_seconds_attacker.pcapng'
-# attackerDf = readPcap(attackFilename,["TFTP opcode","TFTP Read Request"])
-# attackerBytesSent = attackerDf["length"].sum()
+    
+attackFilename = './pcap_tftp_own_tool/level0/tftp_level0_13_seconds_attacker.pcapng'
+attackerDf = pcapToDf(attackFilename)
+attackerDf = attackerDf.loc[attackerDf['Protocol'].isin(["TFTP"])]
+attackerBytesSent = attackerDf["Length"].sum()
 
 victimFilename = './pcap_tftp_own_tool/level0/tftp_level0_13seconds_victim.pcapng'
+victimDf = pcapToDf(victimFilename)
 # look here: in victim pcap filter by destination port 50040 (the tftp servers source port). That will give you the tftp data transfers to the victim
-victimDf = readPcap(victimFilename,["TFTP opcode","TFTP Read Request"])
-attackerBytesSent = attackerDf["length"].sum()
