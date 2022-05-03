@@ -1,9 +1,7 @@
-from numpy import datetime64
 import pandas as pd
 import subprocess
 import os
 from cyberpandas import to_ipaddress
-from alive_progress import alive_it # For printing of progress in for loops
 
 def pcapToDf(filename,RetainCSV=False):
     """ Reads a pcap file with tshark, extracts the data in it and outputs it to a csv file.
@@ -31,46 +29,3 @@ def pcapToDf(filename,RetainCSV=False):
     df.Destination = df.Destination.apply(lambda x: to_ipaddress(x))
     df = df.astype({"TCP Source Port": 'Int64', "TCP Destination Port": 'Int64', "UDP Source Port": 'Int64', "UDP Destination Port":'Int64'})
     return df
-
-## Get All pcap filenames:
-victimFilenames = []
-attackerFilenames = []
-for root, dirs, files in os.walk("./"):
-    for file in files:
-        if file.endswith(".pcapng"):
-            if "victim" in file:
-                victimFilenames.append(os.path.join(root, file))
-            if "attacker" in file:
-                attackerFilenames.append(os.path.join(root, file))
-
-
-
-## Get attacker bytes sent
-attackerBytes = []
-for attackFile in alive_it(attackerFilenames):
-    # Get attack level
-    start = attackFile.find('level')
-    end = start+len('level')+1
-    level = attackFile[start:end]
-    attackerDf = pcapToDf(attackFile)
-    # By finding the TFTP packets and summing the byte lengths we get the total number of bytes send by the attacker
-    attackerDf = attackerDf.loc[attackerDf['Protocol'].isin(["TFTP"])]
-    attackerBytesSent = attackerDf["Length"].sum()
-    attackerBytes.append({'Level':level,'Attacker Bytes Sent':attackerBytesSent})
-
-attackerBytes = pd.DataFrame(attackerBytes).sort_values('Level')
-
-victimBytes = []
-for victimFile in alive_it(victimFilenames):
-    # Get attack level
-    start = victimFile.find('level')
-    end = start+len('level')+1
-    level = victimFile[start:end]
-    victimDf = pcapToDf(victimFile)
-    # In the victim pcap filtering by destination port 50040 (the tftp servers source port) gives the tftp data transfered to the victim
-    victimBytesReceived = victimDf.loc[(victimDf['Protocol'] == "UDP") & (victimDf['UDP Destination Port'] == 50040)]["Length"].sum()
-    victimBytes.append({'Level':level,'Victim Bytes Received':victimBytesReceived})
-victimBytes = pd.DataFrame(victimBytes).sort_values('Level')
-
-print(attackerBytes)
-print(victimBytes)
