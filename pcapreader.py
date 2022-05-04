@@ -2,6 +2,7 @@ import pandas as pd
 import subprocess
 import os
 from cyberpandas import to_ipaddress
+from os.path import exists
 
 def pcapToDf(filename,RetainCSV=False):
     """ Reads a pcap file with tshark, extracts the data in it and outputs it to a csv file.
@@ -11,9 +12,10 @@ def pcapToDf(filename,RetainCSV=False):
             Filename (string): path to pcap file
     """
     csvFilename = os.path.splitext(filename)[0] + '.csv'
-    with open(csvFilename,'w') as f:
-        command = "tshark -r " + filename + " -T fields -e frame.number -e frame.time -e ip.src -e ip.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport -e _ws.col.Protocol -e frame.len -e _ws.col.Info -E header=y -E separator=/t"
-        subprocess.run(command.split(), stdout =f)
+    if not exists(csvFilename):
+        with open(csvFilename,'w') as f:
+            command = "tshark -r " + filename + " -T fields -e frame.number -e frame.time -e ip.src -e ip.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport -e _ws.col.Protocol -e frame.len -e _ws.col.Info -E header=y -E separator=/t"
+            subprocess.run(command.split(), stdout =f)
     # Read headers
     fields = pd.read_csv(csvFilename, index_col=0, nrows=0).columns.tolist()[0].split('\t')
     df = pd.read_csv(csvFilename,sep='\t',header=0,names=fields,na_values=['None'])
