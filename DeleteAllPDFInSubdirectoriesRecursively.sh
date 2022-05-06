@@ -1,0 +1,1 @@
+for d in ./*/; do (cd "$d" && (find . -name "*.csv" -type f -delete)); done

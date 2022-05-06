@@ -1,7 +1,7 @@
 import pandas as pd
 import subprocess
 import os
-from cyberpandas import to_ipaddress
+import ipaddress
 from os.path import exists
 from progressbar import Bar, ETA, \
     AdaptiveETA, Percentage, \
@@ -36,8 +36,8 @@ class PcapReader:
         df.Time = pd.to_datetime(df["Time"], format='%b %d, %Y %H:%M:%S.%f')
         df.Source = df.Source.fillna('0.0.0.0') # 0.0.0.0 is used to represent missing data (In the case of ARP packets for example)
         df.Destination = df.Destination.fillna('0.0.0.0') # 0.0.0.0 is used to represent missing data (In the case of ARP packets for example)
-        df.Source = df.Source.apply(lambda x: to_ipaddress(x))
-        df.Destination = df.Destination.apply(lambda x: to_ipaddress(x))
+        df.Source = df.Source.apply(lambda x: ipaddress.ip_address((x)))
+        df.Destination = df.Destination.apply(lambda x: ipaddress.ip_address(x))
         df = df.astype({"TCP Source Port": 'Int64', "TCP Destination Port": 'Int64', "UDP Source Port": 'Int64', "UDP Destination Port":'Int64'})
         return df
 
