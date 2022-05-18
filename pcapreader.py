@@ -45,7 +45,7 @@ class PcapReader:
         df.Source = df.Source.apply(lambda x: ipaddress.ip_address((x)))
         df.Destination = df.Destination.apply(lambda x: ipaddress.ip_address(x))
         df = df.astype({"TCP Source Port": 'Int64', "TCP Destination Port": 'Int64', "UDP Source Port": 'Int64', "UDP Destination Port":'Int64'})
-        if Tool == "lindenhof":
+        if Tool == "lindenhof" and "snmp" in filename:
             # Hard code the weird packet in reflector file level 5 away
             if "5" in filename and "reflector" in filename:
                 df.at[df[df["FrameNumber"] == 793472].index.to_list()[0],"Protocol"] = "SNMP"
