@@ -30,7 +30,7 @@ class PcapReader:
             print(csvFilename)
             if not exists(csvFilename):
                 command = "tshark -r " + filename + " -T fields -e frame.number -e frame.time -e ip.src -e ip.dst -e tcp.srcport -e tcp.dstport -e udp.srcport -e udp.dstport -e _ws.col.Protocol -e frame.len -e _ws.col.Info -E header=y -E separator=/t > " + csvFilename
-                if Tool == "lindenhof" and ("victim" in csvFilename) or ("reflector" in csvFilename):
+                if Tool == "linderhof" and ("victim" in csvFilename) or ("reflector" in csvFilename):
                     command = command[:len('tshark')+1] + ' -2 ' + command[len('tshark'):] # If the tool is lindenhoff, we need 2 pass analysis for more info on defragmented IP packets
                 subprocess.run(command,shell=True)
             # Read headers
@@ -47,7 +47,7 @@ class PcapReader:
             df.Source = df.Source.apply(lambda x: ipaddress.ip_address((x)))
             df.Destination = df.Destination.apply(lambda x: ipaddress.ip_address(x))
             df = df.astype({"TCP Source Port": 'Int64', "TCP Destination Port": 'Int64', "UDP Source Port": 'Int64', "UDP Destination Port":'Int64'})
-            if Tool == "lindenhof" and "snmp" in filename:
+            if Tool == "linderhof" and "snmp" in filename:
                 # Hard code the weird packet in reflector file level 5 away
                 if "6" in filename and "reflector" in filename:
                     df.at[df[df["FrameNumber"] == 516517].index.to_list()[0],"Protocol"] = "SNMP"
