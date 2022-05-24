@@ -4,16 +4,10 @@ import subprocess
 import os
 import ipaddress
 from os.path import exists
-from progressbar import Bar, ETA, \
-    AdaptiveETA, Percentage, \
-    ProgressBar 
 class PcapReader:
     def __init__(self):
-        self.widgets = [Percentage(),
-                ' ', Bar(),
-                ' ', ETA(),
-                ' ', AdaptiveETA()]
-    
+        self.__name__ = "PcapReader"
+        
     @staticmethod        
     def pcapToDf(filename,RetainCSV=False,Tool="Own"):
         """ Reads a pcap file with tshark, extracts the data in it and outputs it to a csv file.
