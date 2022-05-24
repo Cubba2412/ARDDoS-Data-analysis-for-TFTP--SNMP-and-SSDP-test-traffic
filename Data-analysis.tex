@@ -1817,7 +1817,7 @@ tool}\label{getting-filenames-own-tool}}
     \begin{tcolorbox}[breakable, size=fbox, boxrule=1pt, pad at break*=1mm,colback=cellbackground, colframe=cellborder]
 \prompt{In}{incolor}{ }{\boxspacing}
 \begin{Verbatim}[commandchars=\\\{\}]
-\PY{c+c1}{\PYZsh{} y\PYZhy{}axis are weird for packet plots so we have to redefine the function}
+\PY{c+c1}{\PYZsh{} y\PYZhy{}axis is weird for packet plots so we have to redefine the function}
 \PY{k}{def} \PY{n+nf}{PlotLevelAttackToolCompareData}\PY{p}{(}\PY{n}{df1}\PY{p}{,}\PY{n}{df2}\PY{p}{,}\PY{n}{Protocol}\PY{p}{,}\PY{n}{BytesOrPackets}\PY{p}{,}\PY{n}{Tools}\PY{o}{=}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{own}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{linderhof}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}\PY{p}{)}\PY{p}{:}
     \PY{c+c1}{\PYZsh{} Get single index dataframe}
     \PY{k}{if} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Packets Per Second}\PY{l+s+s2}{\PYZdq{}} \PY{o+ow}{in} \PY{n}{attackerStats}\PY{o}{.}\PY{n}{columns}\PY{o}{.}\PY{n}{to\PYZus{}list}\PY{p}{(}\PY{p}{)}\PY{p}{:}
@@ -1830,13 +1830,15 @@ tool}\label{getting-filenames-own-tool}}
     \PY{k}{if} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Reflector}\PY{l+s+s2}{\PYZdq{}} \PY{o+ow}{in} \PY{n}{cols}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{:}
         \PY{n}{cols} \PY{o}{=} \PY{p}{[}\PY{n}{cols}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}\PY{p}{,}\PY{n}{cols}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{,}\PY{n}{cols}\PY{p}{[}\PY{l+m+mi}{3}\PY{p}{]}\PY{p}{,}\PY{n}{cols}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]}\PY{p}{,}\PY{n}{cols}\PY{p}{[}\PY{l+m+mi}{4}\PY{p}{]}\PY{p}{]}
         \PY{n}{dfCombined} \PY{o}{=} \PY{n}{dfCombined}\PY{p}{[}\PY{n}{cols}\PY{p}{]}
+        \PY{n}{cols} \PY{o}{=} \PY{n}{dfCombined}\PY{o}{.}\PY{n}{columns}\PY{o}{.}\PY{n}{tolist}\PY{p}{(}\PY{p}{)}
 
-        \PY{n}{newnames} \PY{o}{=} \PY{p}{\PYZob{}}\PY{n}{cols}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{:}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Reflector Inbound\PYZlt{}br\PYZgt{}Linderhof Tool}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{cols}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]}\PY{p}{:} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Reflector Outbound\PYZlt{}br\PYZgt{}Linderhof Tool}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{n}{cols}\PY{p}{[}\PY{l+m+mi}{3}\PY{p}{]}\PY{p}{:}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Reflector Inbound\PYZlt{}br\PYZgt{}Own Tool}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{n}{cols}\PY{p}{[}\PY{l+m+mi}{4}\PY{p}{]}\PY{p}{:}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Reflector Outbound\PYZlt{}br\PYZgt{}Own Tool}\PY{l+s+s1}{\PYZsq{}}\PY{p}{\PYZcb{}}
+        \PY{n}{newnames} \PY{o}{=} \PY{p}{\PYZob{}}\PY{n}{cols}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{:}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Reflector Inbound\PYZlt{}br\PYZgt{}Linderhof Tool}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{cols}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]}\PY{p}{:} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Reflector Inbound\PYZlt{}br\PYZgt{}Own Tool}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{n}{cols}\PY{p}{[}\PY{l+m+mi}{3}\PY{p}{]}\PY{p}{:}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Reflector Outbound\PYZlt{}br\PYZgt{}Linderhof Tool}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{n}{cols}\PY{p}{[}\PY{l+m+mi}{4}\PY{p}{]}\PY{p}{:}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Reflector Outbound\PYZlt{}br\PYZgt{}Own Tool}\PY{l+s+s1}{\PYZsq{}}\PY{p}{\PYZcb{}}
         \PY{n}{filenameType} \PY{o}{=} \PY{n}{cols}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{o}{.}\PY{n}{split}\PY{p}{(}\PY{p}{)}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}
         
     \PY{k}{if} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Attacker}\PY{l+s+s2}{\PYZdq{}} \PY{o+ow}{in} \PY{n}{cols}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{:}
         \PY{n}{newnames} \PY{o}{=} \PY{p}{\PYZob{}}\PY{n}{cols}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{p}{:}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Attacker Outbound\PYZlt{}br\PYZgt{}Linderhof Tool}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,} \PY{n}{cols}\PY{p}{[}\PY{l+m+mi}{2}\PY{p}{]}\PY{p}{:} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Attacker Outbound\PYZlt{}br\PYZgt{}Own Tool}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{n}{cols}\PY{p}{[}\PY{l+m+mi}{3}\PY{p}{]}\PY{p}{:}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Victim Inbound\PYZlt{}br\PYZgt{}Linderhof Tool}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{n}{cols}\PY{p}{[}\PY{l+m+mi}{4}\PY{p}{]}\PY{p}{:}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Victim Inbound\PYZlt{}br\PYZgt{}Own Tool}\PY{l+s+s1}{\PYZsq{}}\PY{p}{\PYZcb{}}
         \PY{n}{filenameType} \PY{o}{=} \PY{n}{cols}\PY{p}{[}\PY{l+m+mi}{1}\PY{p}{]}\PY{o}{.}\PY{n}{split}\PY{p}{(}\PY{p}{)}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]} \PY{o}{+} \PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{\PYZhy{}}\PY{l+s+s2}{\PYZdq{}} \PY{o}{+} \PY{n}{cols}\PY{p}{[}\PY{l+m+mi}{3}\PY{p}{]}\PY{o}{.}\PY{n}{split}\PY{p}{(}\PY{p}{)}\PY{p}{[}\PY{l+m+mi}{0}\PY{p}{]}
+
     \PY{n}{color} \PY{o}{=}\PY{p}{[}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{\PYZsh{}ED2939}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{\PYZsh{}007FFF}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{\PYZsh{}00A86B}\PY{l+s+s2}{\PYZdq{}}\PY{p}{,}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{orange}\PY{l+s+s2}{\PYZdq{}}\PY{p}{]}
 
    
